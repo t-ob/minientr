@@ -8,12 +8,11 @@ use std::time::Duration;
 
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 
-#[derive(Debug)]
 pub struct Config<'a> {
     paths: Vec<&'a Path>,
-    pub delay: Duration,
-    pub program: &'a Path,
-    pub args: &'a Vec<String>,
+    delay: Duration,
+    program: &'a Path,
+    args: &'a Vec<String>,
 }
 
 impl<'a> Config<'a> {
@@ -32,15 +31,27 @@ impl<'a> Config<'a> {
         })
     }
 
-    pub fn paths(&self) -> &Vec<&'a Path> {
+    pub fn paths(&self) -> &Vec<&Path> {
         &self.paths
+    }
+
+    pub fn delay(&self) -> Duration {
+        self.delay
+    }
+
+    pub fn program(&self) -> &Path {
+        self.program
+    }
+
+    pub fn args(&self) -> &Vec<String> {
+        self.args
     }
 }
 
 pub fn watch(config: Config) -> notify::Result<()> {
     let (tx, rx) = channel();
 
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, config.delay)?;
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, config.delay())?;
 
     for path in config.paths() {
         watcher.watch(path, RecursiveMode::NonRecursive)?;
@@ -49,8 +60,8 @@ pub fn watch(config: Config) -> notify::Result<()> {
     loop {
         match rx.recv() {
             Ok(notify::DebouncedEvent::Write(_)) => {
-                let output = process::Command::new(config.program)
-                    .args(config.args)
+                let output = process::Command::new(config.program())
+                    .args(config.args())
                     .output()?;
                 io::stdout().write_all(&output.stdout).unwrap();
                 io::stderr().write_all(&output.stderr).unwrap();
