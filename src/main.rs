@@ -7,10 +7,8 @@ use std::time::Duration;
 use minientr::{self, Config};
 
 fn run(config: Config) -> io::Result<()> {
-    println!("{:?}", config);
-
     if let Err(e) = minientr::watch(config) {
-        println!("error: {:?}", e);
+        eprintln!("error: {:?}", e);
     }
 
     Ok(())
@@ -23,9 +21,9 @@ fn main() -> io::Result<()> {
     let input_args: Vec<String> = env::args().collect();
     match &input_args[..] {
         [_] => panic!("no cmd"),
-        o => {
-            program = Path::new(&o[1]);
-            for arg in &o[2..] {
+        cmd_with_args => {
+            program = Path::new(&cmd_with_args[1]);
+            for arg in &cmd_with_args[2..] {
                 args.push(arg.clone());
             }
         }
@@ -34,7 +32,7 @@ fn main() -> io::Result<()> {
     let stdin = io::stdin();
     let handle = stdin.lock();
 
-    let foo: Result<Vec<String>, io::Error> = handle.lines().collect();
+    let paths: Result<Vec<String>, io::Error> = handle.lines().collect();
 
-    run(Config::new(&foo?, Duration::from_secs(2), program, &args)?)
+    run(Config::new(&paths?, Duration::from_secs(2), program, &args)?)
 }
