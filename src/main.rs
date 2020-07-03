@@ -34,5 +34,10 @@ fn main() -> io::Result<()> {
 
     let paths: Result<Vec<String>, io::Error> = handle.lines().collect();
 
-    run(Config::new(&paths?, Duration::from_secs(2), program, &args)?)
+    run(Config::new(
+        &paths?,
+        Duration::from_secs(2),
+        program,
+        &args,
+    )?)
 }
